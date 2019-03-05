@@ -9,7 +9,11 @@
 #include <obmc_console.hpp>
 #include <openbmc_dbus_rest.hpp>
 #include <persistent_data_middleware.hpp>
+#ifdef BMCWEB_ENABLE_REDFISH_RMC
+#include <rmc_redfish.hpp>
+#else 
 #include <redfish.hpp>
+#endif
 #include <redfish_v1.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/bus.hpp>
@@ -21,6 +25,7 @@
 #include <web_kvm.hpp>
 #include <webassets.hpp>
 #include <webserver_common.hpp>
+#include <cpr/cpr.h>
 
 constexpr int defaultPort = 18080;
 
@@ -101,10 +106,14 @@ int main(int argc, char** argv)
 
     crow::connections::systemBus =
         std::make_shared<sdbusplus::asio::connection>(*io);
+#ifdef BMCWEB_ENABLE_REDFISH_RMC
+    redfish::RmcRedfishService redfish(app);
+#else
     redfish::RedfishService redfish(app);
+#endif
 
     app.run();
     io->run();
-
+    
     crow::connections::systemBus.reset();
 }

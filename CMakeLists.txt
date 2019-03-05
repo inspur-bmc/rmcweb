@@ -32,6 +32,7 @@ option (BMCWEB_ENABLE_REDFISH_RAW_PECI "Enable PECI transactions through
 option (BMCWEB_ENABLE_REDFISH_CPU_LOG "Enable CPU log service transactions
        through Redfish.  Paths are under
        '/redfish/v1/Systems/system/LogServices/CpuLog'." OFF)
+option (DBMCWEB_ENABLE_REDFISH_RMC "enable rmc redfish in bmc webserver" OFF)
 
 # Insecure options.  Every option that starts with a BMCWEB_INSECURE flag should
 # not be enabled by default for any platform, unless the author fully
@@ -118,6 +119,7 @@ if (NOT ${YOCTO_DEPENDENCIES}) # Download and unpack googletest at configure
 endif ()
 
 # add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
+add_definitions (-DBOOST_ALLOW_DEPRECATED_HEADERS)
 add_definitions (-DBOOST_ASIO_DISABLE_THREADS)
 add_definitions (-DBOOST_ERROR_CODE_HEADER_ONLY)
 add_definitions (-DBOOST_SYSTEM_NO_DEPRECATED)
@@ -235,11 +237,16 @@ if (${BMCWEB_BUILD_UT})
 endif (${BMCWEB_BUILD_UT})
 
 install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/static/ DESTINATION share/www)
-
+# cpr
+add_subdirectory(cpr)
+include_directories(${CPR_INCLUDE_DIRS})
+add_executable (cprtest src/cpr_test.cpp)
+target_link_libraries (cprtest ${CPR_LIBRARIES})
 # bmcweb
 add_executable (bmcweb ${WEBSERVER_MAIN} ${HDR_FILES} ${SRC_FILES})
 target_link_libraries (bmcweb ${OPENSSL_LIBRARIES})
 target_link_libraries (bmcweb ${ZLIB_LIBRARIES})
+target_link_libraries (bmcweb ${CPR_LIBRARIES})
 target_link_libraries (bmcweb pam)
 target_link_libraries (bmcweb -latomic)
 target_link_libraries (bmcweb -lsystemd)
@@ -264,4 +271,5 @@ target_compile_definitions (
     $<$<BOOL:${BMCWEB_ENABLE_REDFISH_RAW_PECI}>: -DBMCWEB_ENABLE_REDFISH_RAW_PECI>
     $<$<BOOL:${BMCWEB_ENABLE_REDFISH_CPU_LOG}>: -DBMCWEB_ENABLE_REDFISH_CPU_LOG>
     $<$<BOOL:${BMCWEB_ENABLE_REDFISH_BMC_JOURNAL}>: -DBMCWEB_ENABLE_REDFISH_BMC_JOURNAL>
+    $<$<BOOL:${BMCWEB_ENABLE_REDFISH_RMC}>: -DBMCWEB_ENABLE_REDFISH_RMC>
 )
