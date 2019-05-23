@@ -237,11 +237,6 @@ if (${BMCWEB_BUILD_UT})
 endif (${BMCWEB_BUILD_UT})
 
 install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/static/ DESTINATION share/www)
-# cpr
-add_subdirectory(cpr)
-include_directories(${CPR_INCLUDE_DIRS})
-add_executable (cprtest src/cpr_test.cpp)
-target_link_libraries (cprtest ${CPR_LIBRARIES})
 # bmcweb
 add_executable (bmcweb ${WEBSERVER_MAIN} ${HDR_FILES} ${SRC_FILES})
 target_link_libraries (bmcweb ${OPENSSL_LIBRARIES})

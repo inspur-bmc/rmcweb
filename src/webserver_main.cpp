@@ -25,7 +25,6 @@
 #include <web_kvm.hpp>
 #include <webassets.hpp>
 #include <webserver_common.hpp>
-#include <cpr/cpr.h>
 
 constexpr int defaultPort = 18080;
 
