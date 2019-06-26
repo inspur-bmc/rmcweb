@@ -101,24 +101,18 @@ class Thermal : public Node
     void doGet(crow::Response& res, const crow::Request& req,
                const std::vector<std::string>& params) override
     {
-        if (params.size() != 1)
+        if (params.size() != 2)
         {
             messages::internalError(res);
             res.end();
             return;
         }
         const std::string& chassisName = params[0];
-        res.jsonValue["@odata.type"] = "#Thermal.v1_4_0.Thermal";
-        res.jsonValue["@odata.context"] =
-            "/redfish/v1/$metadata#Thermal.Thermal";
-        res.jsonValue["Id"] = "Thermal";
-        res.jsonValue["Name"] = "Thermal";
-
-        res.jsonValue["@odata.id"] =
-            "/redfish/v1/Chassis/" + chassisName + "/Thermal";
-
-        auto asyncResp = std::make_shared<AsyncResp>(res);
-        getThermalInfo(chassisName, asyncResp);
+	const std::string& chassisIp = params[1];
+	auto r = cpr::Get(cpr::Url{"https://" + chassisIp + "/redfish/v1/Chassis/" +
+			chassisName + "/Thermal"},cpr::Authentication{"root", "0penBmc"});
+	res = nlohmann::json::parse(r.text);
+	res.end();
     }
 };
 
